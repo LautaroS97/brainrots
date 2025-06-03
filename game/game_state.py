@@ -15,10 +15,12 @@ sound_manager = None
 _message_queue = []
 _message_timer = 0
 _current_message = ""
+_intro_sequence_pending = False
+_intro_sequence_frame_counter = 0  # ← nuevo contador
 
 # -------------------- TEXTO ANIMADO -------------------------
 class TextAnimator:
-    def __init__(self, full_text: str, speed: int = 30):
+    def __init__(self, full_text: str, speed: int = 10):
         self.full_text = full_text
         self.current_index = 0
         self.timer = 0
@@ -46,6 +48,7 @@ def init_battle(selected_data, sm=None):
     global player1, player2, battle, battle_ui
     global background_img, platform_img, interface_img
     global text_animator, sound_manager, _message_queue, _current_message
+    global _intro_sequence_pending, _intro_sequence_frame_counter
 
     sound_manager = sm
     screen = pygame.display.get_surface()
@@ -81,7 +84,8 @@ def init_battle(selected_data, sm=None):
     _current_message = _message_queue.pop(0)
     text_animator = TextAnimator(_current_message)
 
-    battle.start_intro_sequence()
+    _intro_sequence_pending = True
+    _intro_sequence_frame_counter = 0
 
 # -------------------- DIBUJO POR FRAME ----------------------
 def draw_battle_placeholder(screen):
@@ -131,6 +135,14 @@ def handle_battle_event(event):
 # -------------------- UPDATE LÓGICO -------------------------
 def update_battle_logic(dt):
     global _message_timer, _message_queue, _current_message
+    global _intro_sequence_pending, _intro_sequence_frame_counter
+
+    if _intro_sequence_pending:
+        _intro_sequence_frame_counter += 1
+        if _intro_sequence_frame_counter >= 2:  # ← esperar al menos dos frames reales
+            _intro_sequence_pending = False
+            if sound_manager:
+                sound_manager.play_intro_sequence(player1.name, player2.name)
 
     if text_animator:
         text_animator.update(dt)
@@ -157,8 +169,8 @@ def _handle_end_of_battle():
         return
 
     if sound_manager:
-        battle.play_victory_sound()
         sound_manager.stop("fx_combat_curtain")
+        battle.play_victory_sound()
         sound_manager.play("fx_win" if battle.winner == player1.name else "fx_lose")
 
 # -------------------- TURNO DEL CPU ----------------------

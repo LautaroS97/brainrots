@@ -1,6 +1,6 @@
 import pygame
 import sys
-from ui import menu, summary
+from ui import menu, summary, start_menu
 from game.game_state import (
     init_battle,
     draw_battle_placeholder,
@@ -24,7 +24,7 @@ FPS = 60
 
 # ---------- Estados ----------
 FRONT = "front"
-MENU = "menu"
+START_MENU = "start_menu"
 CHARACTER_SELECT = "character_select"
 BATTLE = "battle"
 SUMMARY = "summary"
@@ -44,7 +44,7 @@ front_characters = pygame.transform.scale(front_characters, front_characters_rec
 
 # ---------- Fuentes personalizadas ----------
 font_title = pygame.font.Font("assets/fonts/retro_gaming.ttf", 60)
-font_prompt = pygame.font.Font("assets/fonts/upheavtt.ttf", 36)  # tamaño agrandado
+font_prompt = pygame.font.Font("assets/fonts/upheavtt.ttf", 36)
 
 # ---------- Sistema de sonido ----------
 sound_manager = SoundManager("assets/sounds")
@@ -54,7 +54,13 @@ sound_manager.load_all([
     "br_br_patapim",
     "lirili_larila",
     "tung_tung_sahur",
-    "vaca_saturno_saturnita"
+    "vaca_saturno_saturnita",
+    "fx_select",
+    "fx_congratulation",
+    "fx_error",
+    "fx_back",
+    "fx_menu_curtain",
+    "fx_combat_curtain"
 ])
 
 # ---------- Parpadeo del texto ----------
@@ -95,20 +101,20 @@ def main():
 
             if current_state == FRONT:
                 if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
-                    current_state = CHARACTER_SELECT
+                    current_state = START_MENU
 
             elif current_state == CHARACTER_SELECT:
                 result = menu.handle_character_select_event(event, sound_manager)
                 if result == "back":
                     sound_manager.play("fx_back")
                     sound_manager.play_loop("fx_menu_curtain")
-                    current_state = MENU
+                    current_state = START_MENU
                 elif result:
                     sound_manager.stop("fx_menu_curtain")
                     sound_manager.play("fx_congratulation")
                     selected_character = result
                     init_battle(selected_character, sound_manager)
-                    sound_manager.play_loop("fx_combat_curtain", volume=0.5)
+                    sound_manager.play_loop("fx_combat_curtain", volume=0.1)
                     current_state = BATTLE
 
             elif current_state == BATTLE:
@@ -118,14 +124,22 @@ def main():
                 action = summary.handle_summary_event(event, sound_manager)
                 if action == "Revancha":
                     init_battle(selected_character, sound_manager)
-                    sound_manager.play_loop("fx_combat_curtain", volume=0.5)
+                    sound_manager.play_loop("fx_combat_curtain", volume=0.1)
                     current_state = BATTLE
                 elif action == "Volver al menú":
                     sound_manager.play_loop("fx_menu_curtain")
-                    current_state = MENU
+                    current_state = START_MENU
 
         if current_state == FRONT:
             draw_front_screen()
+
+        elif current_state == START_MENU:
+            choice = start_menu.run_start_menu(screen, sound_manager)
+            if choice == "CHARACTER_SELECT":
+                current_state = CHARACTER_SELECT
+            elif choice == "QUIT":
+                pygame.quit()
+                sys.exit()
 
         elif current_state == CHARACTER_SELECT:
             menu.draw_character_select(screen, sound_manager, front_background)
@@ -143,9 +157,6 @@ def main():
 
         elif current_state == SUMMARY:
             summary.draw_summary_screen(screen, winner_name, sound_manager)
-
-        elif current_state == MENU:
-            menu.draw_menu(screen, front_background)
 
         # ---------- Actualizar parpadeo ----------
         if current_state == FRONT:

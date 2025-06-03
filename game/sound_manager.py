@@ -3,6 +3,7 @@ import os
 import unicodedata
 import re
 
+
 class SoundManager:
     def __init__(self, base_path: str):
         self.base_path = base_path
@@ -11,7 +12,7 @@ class SoundManager:
         self.channels = {
             "effects": pygame.mixer.Channel(0),
             "voices": pygame.mixer.Channel(1),
-            "ambient": pygame.mixer.Channel(2)
+            "ambient": pygame.mixer.Channel(2),
         }
         pygame.mixer.init()
 
@@ -51,7 +52,7 @@ class SoundManager:
             "fx_select": "menu/fx_select.mp3",
             "fx_congratulation": "menu/fx_congratulation.mp3",
             "fx_back": "menu/fx_back.mp3",
-            "fx_error": "menu/fx_error.mp3"
+            "fx_error": "menu/fx_error.mp3",
         }
         for key, path in common.items():
             self.load_sound(key, path)
@@ -99,37 +100,43 @@ class SoundManager:
 
     # ---------- Secuencias prefabricadas ----------
     def play_intro_sequence(self, name1: str, name2: str):
-        self.play(f"fx_{name1}", volume=1.0, channel="voices")
+        self.play(f"fx_{name1}", volume=1.5, channel="voices")
         while self.channels["voices"].get_busy():
             pygame.time.wait(100)
         self.play("fx_versus", volume=1.0, channel="voices")
         while self.channels["voices"].get_busy():
             pygame.time.wait(100)
-        self.play(f"fx_{name2}", volume=1.0, channel="voices")
+        self.play(f"fx_{name2}", volume=1.5, channel="voices")
         while self.channels["voices"].get_busy():
             pygame.time.wait(100)
         self.play("fx_start_fight", volume=1.0, channel="voices")
 
     def play_victory_energy(self, loser: str, winner: str):
-        self.play(f"fx_{loser}", volume=0.8, channel="voices")
+        self.play(f"fx_{loser}", volume=1.5, channel="voices")
         while self.channels["voices"].get_busy():
             pygame.time.wait(100)
         self.play("fx_end_energy", volume=1.0, channel="effects")
         while self.channels["effects"].get_busy():
             pygame.time.wait(100)
-        self.play(f"fx_{winner}", volume=0.8, channel="voices")
+        self.play(f"fx_{winner}", volume=1.5, channel="voices")
         while self.channels["voices"].get_busy():
             pygame.time.wait(100)
         self.play("fx_winner_for_energy", volume=1.0, channel="effects")
+        # ── Esperar a que termine el último efecto antes de devolver control ──
+        while self.channels["effects"].get_busy():
+            pygame.time.wait(100)
 
     def play_victory_health(self, loser: str, winner: str):
-        self.play(f"fx_{loser}", volume=0.8, channel="voices")
+        self.play(f"fx_{loser}", volume=1.5, channel="voices")
         while self.channels["voices"].get_busy():
             pygame.time.wait(100)
         self.play("fx_end_health", volume=1.0, channel="effects")
         while self.channels["effects"].get_busy():
             pygame.time.wait(100)
-        self.play(f"fx_{winner}", volume=0.8, channel="voices")
+        self.play(f"fx_{winner}", volume=1.5, channel="voices")
         while self.channels["voices"].get_busy():
             pygame.time.wait(100)
         self.play("fx_winner_for_health", volume=1.0, channel="effects")
+        # ── Esperar a que termine el último efecto antes de devolver control ──
+        while self.channels["effects"].get_busy():
+            pygame.time.wait(100)
