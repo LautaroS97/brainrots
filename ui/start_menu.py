@@ -7,7 +7,7 @@ WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 BLACK = (0, 0, 0)
 
-def run_start_menu(screen, sound_manager):
+def run_start_menu(screen, sound_manager, background=None):
     clock = pygame.time.Clock()
     base_font = pygame.font.Font(FONT_PATH, FONT_SIZE)
     selected_index = 0
@@ -15,8 +15,26 @@ def run_start_menu(screen, sound_manager):
     animating_selection = True
     option_rects = []
 
+    # Superficie negra semitransparente (50%)
+    dark_overlay = pygame.Surface(screen.get_size()).convert_alpha()
+    dark_overlay.fill((0, 0, 0, 128))  # 128 = 50% opacidad
+
+    # Cargar gráfico de personajes del menú
+    menu_characters = pygame.image.load("assets/sprites/props/menu_characters.png").convert_alpha()
+    menu_characters = pygame.transform.scale(menu_characters, (550, 300))
+    menu_characters_rect = menu_characters.get_rect(midtop=(screen.get_width() // 2, int(screen.get_height() * 0.15)))
+
     while running:
-        screen.fill((0, 0, 0))
+        # Fondo
+        if background:
+            screen.blit(background, (0, 0))
+
+        # Capa negra semitransparente
+        screen.blit(dark_overlay, (0, 0))
+
+        # Personajes del menú por delante de la oscuridad
+        screen.blit(menu_characters, menu_characters_rect)
+
         option_rects.clear()
 
         for i, option in enumerate(OPTIONS):

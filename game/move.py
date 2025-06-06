@@ -10,7 +10,7 @@ def simple_attack(attacker, defender):
     attacker.consume_energy(cost)
     messages.append(f"{attacker.name} usó {attacker.simple_attack_name}.")
 
-    damage = defender.receive_damage(10)
+    damage = defender.receive_damage(20)
     if damage == 0:
         messages.append("El movimiento fue bloqueado.")
     else:
@@ -51,7 +51,7 @@ def strong_attack(attacker, defender):
     attacker.consume_energy(cost)
     messages.append(f"{attacker.name} lanzó {attacker.strong_attack_name}.")
 
-    damage = defender.receive_damage(25)
+    damage = defender.receive_damage(50)
     if damage == 0:
         messages.append("El movimiento fue bloqueado.")
     else:
@@ -63,8 +63,8 @@ def strong_attack(attacker, defender):
 
 def special_power(attacker):
     messages = []
-    cost = 40
-    heal = 10
+    cost = 25
+    heal = 50
 
     if attacker.energy < cost:
         attacker.consume_energy(attacker.energy)

@@ -3,7 +3,6 @@ import os
 import unicodedata
 import re
 
-
 class SoundManager:
     def __init__(self, base_path: str):
         self.base_path = base_path
@@ -77,10 +76,20 @@ class SoundManager:
     def play_loop(self, key: str, volume: float = 1.0):
         snd = self._get(key)
         if snd:
+            ch = self.channels["ambient"]
             snd.set_volume(volume)
-            self.loop_channels[key] = snd.play(loops=-1)
+            ch.play(snd, loops=-1)
+            self.loop_channels[key] = ch
         else:
             print(f"[SoundManager] Sound '{key}' not found.")
+
+    def ensure_loop(self, key: str, volume: float = 1.0):
+        snd = self._get(key)
+        ch = self.channels["ambient"]
+        if snd and not ch.get_busy():
+            snd.set_volume(volume)
+            ch.play(snd, loops=-1)
+            self.loop_channels[key] = ch
 
     def stop(self, key: str):
         ch = self.loop_channels.get(key)
@@ -122,7 +131,6 @@ class SoundManager:
         while self.channels["voices"].get_busy():
             pygame.time.wait(100)
         self.play("fx_winner_for_energy", volume=1.0, channel="effects")
-        # ── Esperar a que termine el último efecto antes de devolver control ──
         while self.channels["effects"].get_busy():
             pygame.time.wait(100)
 
@@ -137,6 +145,5 @@ class SoundManager:
         while self.channels["voices"].get_busy():
             pygame.time.wait(100)
         self.play("fx_winner_for_health", volume=1.0, channel="effects")
-        # ── Esperar a que termine el último efecto antes de devolver control ──
         while self.channels["effects"].get_busy():
             pygame.time.wait(100)
